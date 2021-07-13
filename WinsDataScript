@@ -1,0 +1,48 @@
+local DataStoreService = game:GetService("DataStoreService")
+local myDataStore  = DataStoreService:GetDataStore("myDataStore")
+
+game.Players.PlayerAdded:Connect(function(player)
+	local leaderstats = Instance.new("Folder")
+	leaderstats.Name = "leaderstats"
+	leaderstats.Parent = player
+
+
+
+	local Wins = Instance.new("IntValue")
+	Wins.Name = "Wins"
+	Wins.Parent = leaderstats
+
+
+	local id = "Player".. player.UserId
+	--local id
+	local Data
+	local success, errormessage = pcall(function()
+		Data = myDataStore:GetAsync(id)
+	end)
+	if success then
+		Wins.Value = Data
+
+		-- set our data eqaul to the current cash
+	end
+
+
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+	local id = "Player".. player.UserId
+
+	local data= player.leaderstats.Wins.value
+
+	local success, errormessage = pcall(function()
+		myDataStore:SetAsync(id, data)
+	end)
+
+
+	if success then
+		print("DataSaved")
+	else
+		print("there is a error")
+		warn(errormessage)
+	end
+
+end)
