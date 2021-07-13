@@ -1,0 +1,146 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
+local MapsFolder = ServerStorage:WaitForChild("Maps")
+local Status = ReplicatedStorage:WaitForChild("Status")
+local GameLenght = 50
+local Reward = 1
+
+while true do 
+	Status.Value = "Waiting For Enough Players"
+	
+	repeat wait() until game.Players.NumPlayers >= 2 
+	
+	Status.Value = "Intermission"
+	
+	wait(10)
+	
+	local plrs = {	}
+	
+	for i, player in pairs(game.Players:GetPlayers()) do
+		if player then
+			table.insert(plrs, player) 
+		end
+	end
+	wait(2)
+	
+	local MapsThere = MapsFolder:GetChildren()
+	
+	local ChosenMaps = MapsThere[math.random(1, #MapsThere)]
+	
+	Status.Value = ChosenMaps.Name .. " Chosen."
+	
+	local ClonedMap = ChosenMaps:Clone()
+	
+	ClonedMap.Parent = game.Workspace
+	
+	--Teleporation
+	
+	local SpawnPoints = ClonedMap:FindFirstChild("SpawnPart")
+	
+	if not SpawnPoints then 
+		print("SpawnPoints Not Found")
+	end
+	
+	local SpawnPointsThere = SpawnPoints:GetChildren()
+	
+	for i, player in pairs(plrs) do
+		if player then
+			character = player.Character
+			if character then
+				character:FindFirstChild('HumanoidRootPart').CFrame = SpawnPointsThere[1].CFrame
+				table.remove(SpawnPointsThere, 1)
+				
+				local Sword = ServerStorage.Sword:Clone()
+				Sword.Parent = player.Backpack
+				
+				
+				
+				local GameTag = Instance.new('BoolValue')
+				GameTag.Name  = "GameTag"
+				GameTag.Parent = character
+				 
+			else
+				if not player then 
+					table.remove(plrs, i)
+				end
+			end
+		end
+	end
+	Status.Value = "Get Ready To Play"
+	
+	wait(2)
+	
+	for i = GameLenght , 0, -1 do
+		
+		for x, player in pairs(plrs) do
+			if player then
+				character = player.Character
+				if not character then
+					
+				else 
+					if character:FindFirstChild("GameTag") then
+						print(player.Name .. "Is still in the game")
+					else
+						table.remove(plrs, x)
+						print(player.Name .. "Has been removed!")
+					end
+					
+				end
+			else 
+				table.remove(plrs, x)
+				print(player.Name .. "Has been removed")
+			end
+		end
+		Status.Value = "There are " .. i .. " seconds remaining, and " .. #plrs .. " player left."
+		
+		if #plrs == 1 then
+			Status.Value = "The winner is " .. plrs[1].Name
+			
+			plrs[1].leaderstats.Wins.Value =  plrs[1].leaderstats.Wins.Value + 1
+			wait(3)
+			
+			break
+		elseif #plrs == 0 then
+			Status.Value  = "Nobody won"
+			
+			break
+			
+		elseif i == 0 then
+			Status.Value = "Time up"
+			
+			break 
+			
+		end
+		wait(1)
+		
+	end
+	print('End of game')
+	
+	for i, player in pairs(game.Players:GetPlayers()) do
+		character = player.Character
+		
+		if not character then
+			
+		else
+			if character:FindFirstChild("GameTag") then
+				character.GameTag:Destroy()
+				
+			end
+			if player.Backpack:FindFirstChild("Sword") then
+				player.Backpack.Sword:Destroy()
+			end
+			if character:FindFirstChild("Sword") then
+				character.Sword:Destroy()
+			end  
+		end
+		player:LoadCharacter()
+		
+	end
+	ClonedMap:Destroy()
+	
+	Status.Value = "Game ended"
+	
+	wait(2)
+	
+	
+end
